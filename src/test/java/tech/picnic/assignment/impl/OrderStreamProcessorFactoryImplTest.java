@@ -1,7 +1,15 @@
 package tech.picnic.assignment.impl;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.json.JSONException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+import tech.picnic.assignment.api.OrderStreamProcessor;
+import tech.picnic.assignment.api.OrderStreamProcessorFactory;
+import tech.picnic.assignment.impl.processor.OrderStreamProcessorFactoryImpl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,16 +20,9 @@ import java.util.Iterator;
 import java.util.Scanner;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
-import org.json.JSONException;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
-import tech.picnic.assignment.api.OrderStreamProcessor;
-import tech.picnic.assignment.api.OrderStreamProcessorFactory;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class OrderStreamProcessorFactoryImplTest {
     private static Stream<Arguments> testProcessInputProvider() {
@@ -30,7 +31,6 @@ final class OrderStreamProcessorFactoryImplTest {
                         100, Duration.ofSeconds(30), "happy-path-input.json-stream", "happy-path-output.json"));
     }
 
-    @Disabled
     @ParameterizedTest
     @MethodSource("testProcessInputProvider")
     void testProcess(
