@@ -48,7 +48,9 @@ class OrderStreamProcessorImplTest {
     @Test
     void givenFluxOfString_deserialize_returnFluxOfOrders() {
         Flux<String> stringFlux = Flux.just(
-                "{\"order_id\":\"1234567892\",\"order_status\":\"delivered\",\"delivery\":{\"delivery_id\":\"j93jf923jf23jg9f\",\"delivery_time\":\"2022-03-20T08:15:00Z\"},\"amount\": 4295}\n"
+                """
+                        {"order_id":"1234567892","order_status":"delivered","delivery":{"delivery_id":"j93jf923jf23jg9f","delivery_time":"2022-03-20T08:15:00Z"},"amount": 4295}
+                        """
         );
         StepVerifier.create(orderStreamProcessor.deserialize(stringFlux))
                 .expectNextMatches(order ->
@@ -74,16 +76,17 @@ class OrderStreamProcessorImplTest {
                         100)
         );
 
-        String expectedValue = "[ {\n" +
-                "  \"delivery_id\" : \"124\",\n" +
-                "  \"delivery_time\" : \"2022-03-20T08:15:00Z\",\n" +
-                "  \"delivery_status\" : \"delivered\",\n" +
-                "  \"orders\" : [ {\n" +
-                "    \"order_id\" : \"456\",\n" +
-                "    \"amount\" : 100\n" +
-                "  } ],\n" +
-                "  \"total_amount\" : 100\n" +
-                "} ]";
+        String expectedValue = """
+                [ {
+                  "delivery_id" : "124",
+                  "delivery_time" : "2022-03-20T08:15:00Z",
+                  "delivery_status" : "delivered",
+                  "orders" : [ {
+                    "order_id" : "456",
+                    "amount" : 100
+                  } ],
+                  "total_amount" : 100
+                } ]""";
 
         StepVerifier.create(orderStreamProcessor.serialize(deliveryFlux))
                 .expectNextMatches(s -> {
@@ -130,15 +133,15 @@ class OrderStreamProcessorImplTest {
         );
 
         StepVerifier.create(orderStreamProcessor.groupByDeliveryAndSort(orderFlux))
-                .expectNextMatches(delivery ->{
-                                System.out.println(delivery);
-                        return "j93jf923jf23jg9f".equals(delivery.deliveryId()) &&
-                                Instant.parse("2022-03-20T08:15:00Z").equals(delivery.deliveryTime()) &&
-                                DeliveryStatus.DELIVERED == delivery.deliveryStatus() &&
-                                "1234567892".equals(delivery.orders().getFirst().orderId()) &&
-                                4295 == delivery.orders().getFirst().amount() &&
-                                4295 == delivery.totalAmount();
-                }
+                .expectNextMatches(delivery -> {
+                            System.out.println(delivery);
+                            return "j93jf923jf23jg9f".equals(delivery.deliveryId()) &&
+                                    Instant.parse("2022-03-20T08:15:00Z").equals(delivery.deliveryTime()) &&
+                                    DeliveryStatus.DELIVERED == delivery.deliveryStatus() &&
+                                    "1234567892".equals(delivery.orders().getFirst().orderId()) &&
+                                    4295 == delivery.orders().getFirst().amount() &&
+                                    4295 == delivery.totalAmount();
+                        }
                 ).expectNextMatches(delivery ->
                         "d923jd29j91d1gh6".equals(delivery.deliveryId()) &&
                                 Instant.parse("2022-05-20T11:50:48Z").equals(delivery.deliveryTime()) &&
